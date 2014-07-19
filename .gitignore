@@ -20,4 +20,8 @@
 *.pdb
 *.ilk
 
+vs_project/Debug/
+vs_project/Release/
+!vs_project/Release/glut32.dll
+!vs_project/Release/cube.exe
 
