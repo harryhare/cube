@@ -165,8 +165,8 @@ void SolveCube2::make_table_prun_template(int n1,int n2, int table1[][9], int ta
 		}
 	}
 	assert(count==n1*n2);
-	save_table("trun_cube2",table_deep,n1*n2);
-	save_table("per_move_cube2",table_pre_move,n1*n2);
+	save_table("cube2_depth.dat",table_deep,n1*n2);
+	save_table("cube2_pre_move.dat",table_pre_move,n1*n2);
 }
 
 

@@ -318,10 +318,10 @@ void SolveCube3::make_table_prun_template(char*name,int n1,int n2, int table1[][
 
 void SolveCube3::make_table_prun()
 {
-	make_table_prun_template("trun_slice_flip",495,2048,table_transport_slice,table_transport_flip,table_trun_slice_flip);
-	make_table_prun_template("trun_slice_twist",495,2187,table_transport_slice,table_transport_twist,table_trun_slice_twist);
-	make_table_prun_template("trun_edge4_edge8",24,40320,table_transport_edge4,table_transport_edge8,table_trun_edge4_edge8,true);
-	make_table_prun_template("trun_edge4_corner",24,40320,table_transport_edge4,table_transport_corner,table_trun_edge4_corner,true);
+	make_table_prun_template("cube3_trun_slice_flip.dat",495,2048,table_transport_slice,table_transport_flip,table_trun_slice_flip);
+	make_table_prun_template("cube3_trun_slice_twist.dat",495,2187,table_transport_slice,table_transport_twist,table_trun_slice_twist);
+	make_table_prun_template("cube3_trun_edge4_edge8.dat",24,40320,table_transport_edge4,table_transport_edge8,table_trun_edge4_edge8,true);
+	make_table_prun_template("cube3_trun_edge4_corner.dat",24,40320,table_transport_edge4,table_transport_corner,table_trun_edge4_corner,true);
 }
 
 
