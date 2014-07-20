@@ -31,9 +31,7 @@ vs_project/Debug/
 vs_project/Release/
 vs_project/cube/Debug/
 vs_project/cube/Release/
-!vs_project/Release/glut32.dll
-!vs_project/Release/cube.exe
-!vs_project/cube/glut32.dll
-!vs_project/cube/glut32.lib
-!vs_project/cube/glut.lib
+!vs_project/glut/glut32.dll
+!vs_project/glut/glut32.lib
+!vs_project/glut/glut.h
 
