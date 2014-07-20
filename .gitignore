@@ -31,6 +31,7 @@ vs_project/Debug/
 vs_project/Release/
 vs_project/cube/Debug/
 vs_project/cube/Release/
+vs_project/cube/*.dat
 !vs_project/glut/glut32.dll
 !vs_project/glut/glut32.lib
 !vs_project/glut/glut.h
