@@ -11,6 +11,22 @@
 #include <algorithm>
 
 SolveCube3 * SolveCube3::instance_=new SolveCube3;
+char SolveCube3::table_motion_corner[18][8];
+char SolveCube3::table_motion_edge[18][12];
+char SolveCube3::table_motion_twist[18][8];
+char SolveCube3::table_motion_flip[18][12];
+
+int  SolveCube3::table_transport_corner[40320][18];//8!
+int  SolveCube3::table_transport_twist[2187][18];//3^7
+int  SolveCube3::table_transport_flip[2048][18];//2^11
+int	 SolveCube3::table_transport_edge8[40320][18];//8!
+int  SolveCube3::table_transport_edge4[24][18];//4!
+int  SolveCube3::table_transport_slice[495][18];//12*11*10*9/4!
+
+char SolveCube3::table_trun_slice_flip[495*2048];
+char SolveCube3::table_trun_slice_twist[495*2187];
+char SolveCube3::table_trun_edge4_edge8[24*40320];
+char SolveCube3::table_trun_edge4_corner[24*40320];
 
 static char basic_motion_corner[6][8] = 
 {
@@ -57,38 +73,10 @@ static int motion_translation[][3] = //{axis,id,times}
 	{2,0,1},{2,0,2},{2,0,-1},
 	{1,0,1},{3,0,2},{1,0,-1}
 };
-static char corner_faces[8][3]=
-{
-	{0,1,2},
-	{0,2,4},
-	{0,4,5},
-	{0,5,1},
-	{3,2,1},
-	{3,4,2},
-	{3,5,4},
-	{3,1,5},
-};
-
-static char edge_faces[12][2]=
-{
-	{0,1},
-	{0,2},
-	{0,4},
-	{0,5},
-	{3,1},
-	{3,2},
-	{3,4},
-	{3,5},
-	{2,1},
-	{2,4},
-	{5,4},
-	{5,1},
-};
 
 void SolveCube3::Init()
 {
 	Permutation::Init();
-	Permutation::test();
 	make_table_corner();
 	make_table_edge();
 	make_table_motion();
@@ -98,59 +86,8 @@ void SolveCube3::Init()
 }
 
 
-void SolveCube3::make_table_corner()
-{
-
-	//table_corner_[0]=007;//000111b;
-	//table_corner_[1]=025;//010101b;
-	//table_corner_[2]=061;//110001b;
-	//table_corner_[3]=043;//100011b;
-	//table_corner_[4]=016;//001110b;
-	//table_corner_[5]=034;//011100b;
-	//table_corner_[6]=070;//111000b;
-	//table_corner_[7]=052;//101010b;
-	table_corner_[0]=7;//000111b;
-	table_corner_[1]=5;//010101b;
-	table_corner_[2]=1;//110001b;
-	table_corner_[3]=3;//100011b;
-	table_corner_[4]=6;//001110b;
-	table_corner_[5]=4;//011100b;
-	table_corner_[6]=0;//111000b;
-	table_corner_[7]=2;//101010b;
-	for(int i=0;i<8;i++)
-	{
-		table_corner_inverse_[table_corner_[i]]=i;
-	}
-
-}
-void SolveCube3::make_table_edge()
-{
-	table_edge_[0] =003;//000011;
-	table_edge_[1] =005;//000101;
-	table_edge_[2] =021;//010001;
-	table_edge_[3] =041;//100001;
 
 
-	table_edge_[4] =012;//001010;
-	table_edge_[5] =014;//001100;
-	table_edge_[6] =030;//011000;
-	table_edge_[7] =050;//101000;
-
-	table_edge_[8] =006;//000110;
-	table_edge_[9] =024;//010100;
-	table_edge_[10]=060;//110000;
-	table_edge_[11]=042;//100010;
-
-	for(int i=0;i<sizeof(table_edge_inverse_);i++)
-	{
-		table_edge_inverse_[i]=-1;
-	}
-	for(int i=0;i<12;i++)
-	{
-		table_edge_inverse_[table_edge_[i]]=i;
-	}
-	
-}
 
 void SolveCube3::make_table_motion()
 {
@@ -326,90 +263,7 @@ void SolveCube3::make_table_prun()
 
 
 
-char SolveCube3::get_corner_id(int i,int j,int k)
-{
-	int x=0;
-	x |= (1<<i);
-	x |= (1<<j);
-	x |= (1<<k);
-	x &= 007;
-	return table_corner_inverse_[x];
-}
-char SolveCube3::get_corner_id_from_cube(int i,int j,int k)
-{
-	i=table_color_inverse_[i];
-	j=table_color_inverse_[j];
-	k=table_color_inverse_[k];
-	return get_corner_id(i,j,k);
-}
-char SolveCube3::get_edge_id(int i,int j)
-{
-	int x=0;
-	x |= (1<<i);
-	x |= (1<<j);
-	return table_edge_inverse_[x];
-}
-char SolveCube3::get_edge_id_from_cube(int i,int j)
-{
-	i=table_color_inverse_[i];
-	j=table_color_inverse_[j];
-	return get_edge_id(i,j);
-}
-char SolveCube3::get_corner_twist(int i,int j,int k)
-{
-	i=i%3;
-	j=j%3;
-	k=k%3;
-	if(i==0)
-	{
-		return 0;
-	}
-	if(j==0)
-	{
-		return 1;
-	}
-	if(k==0)
-	{
-		return 2;
-	}
-	return -1;
-}
-char SolveCube3::get_corner_twist_from_cube(int i,int j,int k)
-{
-	i=table_color_inverse_[i];
-	j=table_color_inverse_[j];
-	k=table_color_inverse_[k];
-	return get_corner_twist(i,j,k);
-}
-char SolveCube3::get_edge_flip(int i,int j)
-{
-	i=i%3;
-	j=j%3;
-	if(i==0&&j!=0)
-	{
-		return 0;
-	}
-	if(i!=0&&j==0)
-	{
-		return 1;
-	}
-	if(i==2&&j==1)
-	{
-		return 0;
-	}
-	if(i==1&&j==2)
-	{
-		return 1;
-	}
-	return -1;
-}
-char SolveCube3::get_edge_flip_from_cube(int i,int j)
-{
 
-	i=table_color_inverse_[i];
-	j=table_color_inverse_[j];
-	return get_edge_flip(i,j);
-}
 void SolveCube3::GetColorData(Cube *cube)
 {
 	table_color_[0]=cube->top()[4];
@@ -425,11 +279,19 @@ void SolveCube3::GetColorData(Cube *cube)
 	}
 }
 
+void SolveCube3::GetData(char *corner_permutation,char*corner_twist,char* edge_permutation,char* edge_flip)
+{
+	memcpy(corner_permutation_,corner_permutation,8);
+	memcpy(corner_twist_,corner_twist,8);
+	memcpy(edge_permutation_,edge_permutation,12);
+	memcpy(edge_flip_,edge_flip,12);
+}
+
 void SolveCube3::GetData(Cube * cube)
 {
 	assert(cube->n()==3);
 	GetColorData(cube);
-
+/*
 	corner_permutation_[0]=get_corner_id_from_cube(cube->top()[8]   ,cube->right()[8],cube->front()[8]);
 	corner_permutation_[1]=get_corner_id_from_cube(cube->top()[6]   ,cube->front()[2],cube->left()[8]);
 	corner_permutation_[2]=get_corner_id_from_cube(cube->top()[0]   ,cube->left()[6],cube->back()[2]);
@@ -473,12 +335,56 @@ void SolveCube3::GetData(Cube * cube)
 	edge_flip_[9]=get_edge_flip_from_cube(cube->front()[1], cube->left()[5]);
 	edge_flip_[10]=get_edge_flip_from_cube(cube->back()[1], cube->left()[3]);
 	edge_flip_[11]=get_edge_flip_from_cube(cube->back()[7], cube->right()[3]);
+	*/
+	int* corners[8][3];
+	int* edges[12][2];
+	corners[0][0]=&(cube->top()[8])		;corners[0][1]=&(cube->right()[8]);	corners[0][2]=&(cube->front()[8]);
+	corners[1][0]=&(cube->top()[6])		;corners[1][1]=&(cube->front()[2]);	corners[1][2]=&(cube->left()[8]);
+	corners[2][0]=&(cube->top()[0])		;corners[2][1]=&(cube->left()[6]);	corners[2][2]=&(cube->back()[2]);
+	corners[3][0]=&(cube->top()[2])		;corners[3][1]=&(cube->back()[8]);	corners[3][2]=&(cube->right()[6]);
+	corners[4][0]=&(cube->bottom()[8])	;corners[4][1]=&(cube->front()[6]);	corners[4][2]=&(cube->right()[2]);
+	corners[5][0]=&(cube->bottom()[6])	;corners[5][1]=&(cube->left()[2]);	corners[5][2]=&(cube->front()[0]);
+	corners[6][0]=&(cube->bottom()[0])	;corners[6][1]=&(cube->back()[0]);	corners[6][2]=&(cube->left()[0]);
+	corners[7][0]=&(cube->bottom()[2])	;corners[7][1]=&(cube->right()[0]);	corners[7][2]=&(cube->back()[6]);
 
+	edges[0][0]=&(cube->top()[5]);		edges[0][1]=&(cube->right()[7]);
+	edges[1][0]=&(cube->top()[7]);		edges[1][1]=&(cube->front()[5]);
+	edges[2][0]=&(cube->top()[3]);		edges[2][1]=&(cube->left()[7]);
+	edges[3][0]=&(cube->top()[1]);		edges[3][1]=&(cube->back()[5]);
+	edges[4][0]=&(cube->bottom()[5]);	edges[4][1]=&(cube->right()[1]);
+	edges[5][0]=&(cube->bottom()[7]);	edges[5][1]=&(cube->front()[3]);
+	edges[6][0]=&(cube->bottom()[3]);	edges[6][1]=&(cube->left()[1]);
+	edges[7][0]=&(cube->bottom()[1]);	edges[7][1]=&(cube->back()[3]);
+	edges[8][0]=&(cube->front()[7]);	edges[8][1]=&(cube->right()[5]);
+	edges[9][0]=&(cube->front()[1]);	edges[9][1]=&(cube->left()[5]);
+	edges[10][0]=&(cube->back()[1]);	edges[10][1]=&(cube->left()[3]);
+	edges[11][0]=&(cube->back()[7]);	edges[11][1]=&(cube->right()[3]);
+
+	for(int i=0;i<8;i++)
+	{
+		corner_permutation_[i]=get_corner_id_from_cube(*corners[i][0],*corners[i][1],*corners[i][2]);
+	}
+	for(int i=0;i<8;i++)
+	{
+		corner_twist_[i]=get_corner_twist_from_cube(*corners[i][0],*corners[i][1],*corners[i][2]);
+	}
+	for(int i=0;i<12;i++)
+	{
+		edge_permutation_[i]=get_edge_id_from_cube(*edges[i][0], *edges[i][1]);
+	}
+	for(int i=0;i<12;i++)
+	{
+		edge_flip_[i]=get_edge_flip_from_cube(*edges[i][0], *edges[i][1]);
+	}
 	PrintState();
 	assert(solvable());
 }
 void SolveCube3::PrintState()
 {
+	if(enable_print_state_==false)
+	{
+		return;
+	}
 	std::cout<<"corner = {";
 	for(int i=0;i<7;i++)
 	{
@@ -505,91 +411,48 @@ void SolveCube3::PrintState()
 	std::cout<<(int)edge_flip_[11]<<"}"<<std::endl;
 }
 
-void SolveCube3::MakeRandomCube(Cube *cube)
+void SolveCube3::MakeRandomCubeCore()
 {
-	//srand((unsigned int)time(NULL));
 	//assert(RAND_MAX>10000);
-	//step 1
-	for(int i=0;i<8;i++)
+	/*
+	//FOR TEST
+	for(int i=0;i<12;i++)
 	{
-		corner_permutation_[i]=i;
+		edge_permutation_[i]=basic_motion_edge[0][i]-1;
 	}
 	for(int i=0;i<12;i++)
 	{
-		edge_permutation_[i]=i;
+		edge_flip_[i]=basic_motion_flip[0][i];
 	}
-	std::random_shuffle(corner_permutation_,corner_permutation_+8);
-	std::random_shuffle(edge_permutation_,edge_permutation_+12);
-	int s1=Permutation::Signature(corner_permutation_,8);
-	int s2=Permutation::Signature(edge_permutation_,12);
-	if(s1!=s2)
+	for(int i=0;i<8;i++)
 	{
-		int temp=corner_permutation_[0];
-		for(int i=0;i<7;i++)
-		{
-			corner_permutation_[i]=corner_permutation_[i+1];
-		}
-		corner_permutation_[7]=temp;
+		corner_permutation_[i]=basic_motion_corner[0][i]-1;
 	}
-	s1=Permutation::Signature(corner_permutation_,8);
-	assert(s1==s2);
-	int twist=rand()%2187;
-	int flip=rand()%2048;
-	char * temp;
-	temp=twist2int_inverse(twist);
-	memcpy(corner_twist_,temp,8);
-	temp=flip2int_inverse(flip);
-	memcpy(edge_flip_,temp,12);
+	for(int i=0;i<8;i++)
+	{
+		corner_twist_[i]=basic_motion_twist[0][i];
+	}
+	PrintState();
+	*/
+	make_random_corner();
+	make_random_middle_edge();
+}
+
+void SolveCube3::MakeRandomCube(Cube *cube)
+{
+	//step 1
+	MakeRandomCubeCore();
 	PrintState();
 	assert(solvable());	
 
 	//step2
 	assert(cube->n()==3);
-
+	fill_corner_pointer(cube);
+	fill_midedge_pointer(cube);
 	GetColorData(cube);
-	
-	int* corners[8][3];
-	int* edges[12][2];
-	corners[0][0]=&(cube->top()[8])		;corners[0][1]=&(cube->right()[8]);	corners[0][2]=&(cube->front()[8]);
-	corners[1][0]=&(cube->top()[6])		;corners[1][1]=&(cube->front()[2]);	corners[1][2]=&(cube->left()[8]);
-	corners[2][0]=&(cube->top()[0])		;corners[2][1]=&(cube->left()[6]);	corners[2][2]=&(cube->back()[2]);
-	corners[3][0]=&(cube->top()[2])		;corners[3][1]=&(cube->back()[8]);	corners[3][2]=&(cube->right()[6]);
-	corners[4][0]=&(cube->bottom()[8])	;corners[4][1]=&(cube->front()[6]);	corners[4][2]=&(cube->right()[2]);
-	corners[5][0]=&(cube->bottom()[6])	;corners[5][1]=&(cube->left()[2]);	corners[5][2]=&(cube->front()[0]);
-	corners[6][0]=&(cube->bottom()[0])	;corners[6][1]=&(cube->back()[0]);	corners[6][2]=&(cube->left()[0]);
-	corners[7][0]=&(cube->bottom()[2])	;corners[7][1]=&(cube->right()[0]);	corners[7][2]=&(cube->back()[6]);
+	corner2cube();
+	midedge2cube();
 
-	edges[0][0]=&(cube->top()[5]);		edges[0][1]=&(cube->right()[7]);
-	edges[1][0]=&(cube->top()[7]);		edges[1][1]=&(cube->front()[5]);
-	edges[2][0]=&(cube->top()[3]);		edges[2][1]=&(cube->left()[7]);
-	edges[3][0]=&(cube->top()[1]);		edges[3][1]=&(cube->back()[5]);
-	edges[4][0]=&(cube->bottom()[5]);	edges[4][1]=&(cube->right()[1]);
-	edges[5][0]=&(cube->bottom()[7]);	edges[5][1]=&(cube->front()[3]);
-	edges[6][0]=&(cube->bottom()[3]);	edges[6][1]=&(cube->left()[1]);
-	edges[7][0]=&(cube->bottom()[1]);	edges[7][1]=&(cube->back()[3]);
-	edges[8][0]=&(cube->front()[7]);	edges[8][1]=&(cube->right()[5]);
-	edges[9][0]=&(cube->front()[1]);	edges[9][1]=&(cube->left()[5]);
-	edges[10][0]=&(cube->back()[1]);	edges[10][1]=&(cube->left()[3]);
-	edges[11][0]=&(cube->back()[7]);	edges[11][1]=&(cube->right()[3]);
-
-	int t;
-	int p;
-	for(int i=0;i<8;i++)
-	{
-		p=corner_permutation_[i];
-		t=corner_twist_[i];
-		t=(3-t)%3;//just to unify with solve()
-		*(corners[i][0])=table_color_[corner_faces[p][(0+t)%3]];
-		*(corners[i][1])=table_color_[corner_faces[p][(1+t)%3]];
-		*(corners[i][2])=table_color_[corner_faces[p][(2+t)%3]];
-	}
-	for(int i=0;i<12;i++)
-	{
-		p=edge_permutation_[i];
-		t=edge_flip_[i];
-		*(edges[i][0])=table_color_[edge_faces[p][(0+t)%2]];
-		*(edges[i][1])=table_color_[edge_faces[p][(1+t)%2]];
-	}
 }
 
 int	 SolveCube3::slice2int(char* a)
@@ -631,18 +494,6 @@ char* SolveCube3::slice2int_inverse(int n)
 	return a;
 }
 
-int  SolveCube3::corner2int(char* a)
-{
-	char b[8];
-	memcpy(b,a,8);
-	return Permutation::RankPermutation(b,8);
-}
-char* SolveCube3::corner2int_inverse(int n)
-{
-	static char a[8];
-	Permutation::UnRankPermutation(n,8,a);
-	return a;
-}
 int  SolveCube3::edge8int(char* a)
 {
 	char b[8];
@@ -683,82 +534,9 @@ char* SolveCube3::edge4int_inverse(int n)
 	return a;
 }
 
-int  SolveCube3::flip2int(char* a)
-{
-	int x=0;
-	for(int i=0;i<11;i++)
-	{
-		x=(x<<1)+a[i];
-	}
-	return x;
-}
-char* SolveCube3::flip2int_inverse(int n)
-{
-	assert(n<2048);
-	static char a[12];
-	int sum=0;
-	for(int i=10;i>=0;i--)
-	{
-		a[i]= n%2;
-		n   = n/2;
-		sum+=a[i];
-	}
-	a[11] = (sum%2);
-	return a;
-}
-int  SolveCube3::twist2int(char* a)
-{
-	int x=0;
-	for(int i=0;i<7;i++)
-	{
-		x=(x*3)+a[i];
-	}
-	return x;
-}
-char* SolveCube3::twist2int_inverse(int n)
-{
-	assert(n<2187);
-	static char a[8];
-	int sum=0;
-	for(int i=6;i>=0;i--)
-	{
-		a[i]= n%3;
-		n   = n/3;
-		sum+=a[i];
-	}
-	a[7] = (3-(sum%3))%3;
-	return a;	
-}
 
 
 
-bool SolveCube3::valid_twist()
-{
-	int sum=0;
-	for(int i=0;i<8;i++)
-	{
-		if(corner_twist_[i]<0 || corner_twist_[i]>2)
-		{
-			return false;
-		}
-		sum+=corner_twist_[i];
-	}
-	return (sum%3==0);
-}
-
-bool SolveCube3::valid_flip()
-{
-	int sum=0;
-	for(int i=0;i<12;i++)
-	{
-		if(edge_flip_[i]<0 || edge_flip_[i]>1)
-		{
-			return false;
-		}
-		sum+=edge_flip_[i];
-	}
-	return (sum%2==0);
-}
 
 bool SolveCube3::solvable()
 {
@@ -775,7 +553,7 @@ bool SolveCube3::solvable()
 	return(b1&&b2&&b3&&b4&&b5);
 }
 
-void SolveCube3::Solve()
+void SolveCube3::SolveCore()
 {
 	int slice=slice2int(edge_permutation_);
 	int twist=twist2int(corner_twist_);
@@ -817,6 +595,12 @@ void SolveCube3::Solve()
 		}
 	}
 
+}
+
+
+void SolveCube3::Solve()
+{
+	SolveCore();
 
 	//verify
 	assert(search1_stop_);

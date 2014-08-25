@@ -83,10 +83,40 @@ public:
 	{
 		return bottom_;
 	}
+	int* face(int n)
+	{
+		int* temp=NULL;
+		switch(n)
+		{
+		case 0:
+			temp=top_;
+			break;
+		case 1:
+			temp=right_;
+			break;
+		case 2:
+			temp=front_;
+			break;
+		case 3:
+			temp=bottom_;
+			break;
+		case 4:
+			temp=left_;
+			break;
+		case 5:
+			temp=back_;
+			break;
+		default:
+			temp=NULL;
+			perror("Cube invalid index,Cube::face\n");
+		}
+		return temp;
+	}
 	const Block *blocks() const
 	{
 		return blocks_;
 	}
+
 
 private:
 	const int n_;

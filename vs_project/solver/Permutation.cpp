@@ -1,9 +1,10 @@
 #include "Permutation.h"
 #include <cassert>
 #include <iostream>
-const int Permutation::FACTORIAL_LENGTH=13;//need to notice the integer range 
+const int Permutation::FACTORIAL_LENGTH=25;//need to notice the integer range 
 int Permutation::factorial[FACTORIAL_LENGTH];
 int Permutation::binomial[FACTORIAL_LENGTH][FACTORIAL_LENGTH];
+int Permutation::permutation_[FACTORIAL_LENGTH][FACTORIAL_LENGTH];// some may be too large ...
 bool Permutation::init_done_=false;
 
 void Permutation::Init()
@@ -29,6 +30,16 @@ void Permutation::Init()
 		}
 	}
 	init_done_=true;
+
+	permutation_[0][0]=1;
+	for(int i=0;i<FACTORIAL_LENGTH;i++)
+	{
+		permutation_[i][0]=1;
+		for(int j=1;j<=i;j++)
+		{
+			permutation_[i][j]=permutation_[i][j-1]*(i-j+1);
+		}
+	}
 }
 
 bool Permutation::IsPermutation(char *a,int n)
@@ -121,6 +132,10 @@ int Permutation::RankSubset(char *a, int n_sub, int n_total)
 	{
 		a[i] -= (a[0]+1);
 	}
+	if(n_total<=a[0]+1)
+	{
+		std::cout<<"break point"<<std::endl;
+	}
 	assert(n_total>a[0]+1);
 	x+=RankSubset(a+1,n_sub-1,n_total-a[0]-1);
 	return x;
@@ -168,6 +183,7 @@ void Permutation::test()
 		}
 	}
 	*/
+	/*
 	for(int i=1;i<=12;i++)
 	{
 		for(int sub=1;sub<=i;sub++)
@@ -176,6 +192,17 @@ void Permutation::test()
 			{
 				UnRankSubset(r,sub,i,a);
 				assert(RankSubset(a,sub,i)==r);
+			}
+		}
+	}*/
+	for(int i=1;i<=6;i++)
+	{
+		for(int sub=1;sub<=i;sub++)
+		{
+			for(int r=0;r<permutation_[i][sub];r++)
+			{
+				UnRankPermutation(r,sub,i,a);
+				assert(RankPermutation(a,sub,i)==r);
 			}
 		}
 	}
@@ -201,4 +228,44 @@ void Permutation::test()
 	assert(Signature(c3,3)==-1);
 	assert(Signature(c3,2)==-1);
 	assert(Signature(c3,1)==1);
+}
+
+
+int Permutation::RankPermutation(char *a, int n_sub,int n_total)
+{
+	assert(n_sub<=n_total);
+	if(n_sub==1)
+	{
+		return a[0];
+	}
+	int x=0;
+	x+=permutation_[n_total-1][n_sub-1]*a[0];
+	for(int i=1;i<n_sub;i++)
+	{
+		if(a[i]>a[0])
+		{
+			a[i] -= 1;
+		}
+	}
+	x+=RankPermutation(a+1,n_sub-1,n_total-1);
+	return x;
+}
+void Permutation::UnRankPermutation(int rank, int n_sub, int n_total,char* a)
+{
+	if(n_sub==1)
+	{
+		a[0]=rank;
+		return;
+	}
+
+	a[0] = rank/permutation_[n_total-1][n_sub-1];
+	rank %= permutation_[n_total-1][n_sub-1];
+	UnRankPermutation(rank, n_sub-1,n_total-1, a+1);
+	for(int j=1;j<n_sub;j++)
+	{
+		if(a[j]>=a[0])
+		{
+			a[j]+=1;
+		}
+	}
 }
