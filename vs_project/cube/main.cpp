@@ -3,17 +3,19 @@
 #include <cmath>
 #include <cassert>
 #include <windows.h>
-#include <glut.h>
-#include <gl/GLU.h>
-#include <gl/GL.h>
 #include <iostream>
 #include <ctime>
 #include <cstdlib>
-#include "common.h"
+#include <gl/GLU.h>
+#include <gl/GL.h>
+#include "glut/glut.h"
+#include "solver/common.h"
+#include "solver/Cube.h"
+#include "solver/SolveCube2.h"
+#include "solver/SolveCube3.h"
+#include "solver/SolveCubeN.h"
+
 #include "Control.h"
-#include "Cube.h"
-#include "SolveCube3.h"
-#include "SolveCube2.h"
 
 
 #define ENABLE_DEPTH
@@ -25,7 +27,7 @@ Cube *cube=NULL;
 double a=4.0;
 double camera_factor=2.0;
 int rotation_mode=2;
-const int DEFAULT_CUBE = 3;
+const int DEFAULT_CUBE = 4;
 bool transparent_cube=false;
 
 static int motion_translation_cube3[][3] = //{axis,id,times}
@@ -1153,6 +1155,45 @@ void timer_solve_cube(int value)
 	glutTimerFunc(20,timer_solve_cube,value+1);
 }
 
+void timer_solve_cube_n(int value)
+{
+	int n=SolveCubeN::GetInstance()->solution_single_.size();
+	vector<Move>& solve=SolveCubeN::GetInstance()->solution_single_;
+	if(value%10==0)
+	{
+		if(value/10>=1)
+		{
+			cube->Rotate(rotation_axis,rotation_id,times);
+		}
+		if(value/10==n)
+		{
+			response=true;
+			glutPostRedisplay();
+			std::cout<<"solve_done"<<std::endl;
+			return;
+		}
+		if(value/10<n)
+		{
+			int i=value/10;
+			rotation_axis=(Cube::Orientation)(solve.at(i).direction);
+			rotation_id=solve.at(i).index;
+			times=solve.at(i).rotation;
+			if(times!=-1 && times!=1)
+			{
+				std::cout<<"break point"<<std::endl;
+			}
+
+			assert(rotation_axis==1||rotation_axis==2||rotation_axis==3);
+			assert(rotation_id<cube->n()&& rotation_id>=0);
+			assert(times==-1 || times==1);
+		}
+	}
+	rotation_angle=value%10*90/10*times;
+	glutPostRedisplay();
+	glutTimerFunc(20,timer_solve_cube_n,value+1);
+}
+
+
 
 void mouse_click(int button, int state, int mouse_x, int mouse_y)
 {
@@ -1275,6 +1316,10 @@ void keyboard(unsigned char key, int x, int y)
 		{
 			SolveCube2::GetInstance()->MakeRandomCube(cube);
 		}
+		else
+		{
+			SolveCubeN::GetInstance()->MakeRandomCube(cube);
+		}
 	}
 	if(key=='s'|| key=='S')
 	{
@@ -1305,6 +1350,20 @@ void keyboard(unsigned char key, int x, int y)
 			motion_translation_cube=motion_translation_cube2;
 			response=false;
 			glutTimerFunc(20,timer_solve_cube,0);
+		}
+		else
+		{
+			SolveCubeN::GetInstance()->GetData(cube);
+			SolveCubeN::GetInstance()->Solve();
+			printf("solve cube ...\n");
+			rotation_angle=0;
+			rotation_axis=Cube::NONE;
+			rotation_id=0;
+			//solve_n=SolveCubeN::GetInstance()->solution_single_length();
+			//solve_array=SolveCubeN::GetInstance()->solution_single_move();
+			//motion_translation_cube=motion_translation_cubeN;
+			response=false;
+			glutTimerFunc(20,timer_solve_cube_n,0);
 		}
 	}
 
@@ -1343,6 +1402,7 @@ int main(int argc, char ** argv)
 {
 	srand((unsigned int)time(NULL));
 	assert(RAND_MAX>10000);
+
 	produce_cube();
 
 

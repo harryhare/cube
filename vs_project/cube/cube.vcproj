@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)glut\&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -181,27 +181,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Cube.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\main.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Permutation.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SolveCube.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SolveCube2.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SolveCube3.cpp"
 				>
 			</File>
 		</Filter>
@@ -211,31 +191,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\common.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Control.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Cube.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Permutation.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SolveCube.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SolveCube2.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SolveCube3.h"
 				>
 			</File>
 		</Filter>
