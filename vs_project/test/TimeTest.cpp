@@ -49,7 +49,7 @@ void TimeTest::print_info(int cube_order)
 
 void TimeTest::Clocker()
 {
-	out_file_.open("statstics.txt");
+	out_file_.open("statstics.dat");
 
 	std::cout<<"------------------------------------"<<std::endl;
 
