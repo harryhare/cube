@@ -6,9 +6,9 @@
 class Move
 {
 public:
-	int direction;
+	char direction;
+	char rotation;
 	int index;
-	int rotation;
 };
 
 

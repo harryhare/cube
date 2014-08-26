@@ -68,17 +68,18 @@ void TimeTest::Clocker()
 	clock_end();
 	print_info(3);
 
-	for(int i=1000;i<=10000;i+=1000)
+	
+	for(int i=4;i<=31;i++)
 	{
 		TestCubeN(i,1);
 		clock_begin();
-		repeat_times_=5;
+		repeat_times_=50;
 		TestCubeN(i,repeat_times_);
 		clock_end();
 		print_info(i);
 	}
-/*
-	for(int i=4;i<30;i++)
+
+	for(int i=11;i<=101;i+=10)
 	{
 		TestCubeN(i,1);
 		clock_begin();
@@ -88,7 +89,7 @@ void TimeTest::Clocker()
 		print_info(i);
 	}
 
-	for(int i=50;i<=500;i+=50)
+	for(int i=51;i<=1001;i+=50)
 	{
 		TestCubeN(i,1);
 		clock_begin();
@@ -97,7 +98,18 @@ void TimeTest::Clocker()
 		clock_end();
 		print_info(i);
 	}
-*/
+
+
+	for(int i=1000;i<=10000;i+=1000)
+	{
+		TestCubeN(i,1);
+		clock_begin();
+		repeat_times_=5;
+		TestCubeN(i,repeat_times_);
+		clock_end();
+		print_info(i);
+	}
+
 	out_file_.close();
 }
 
