@@ -41,14 +41,14 @@ t —— 透明魔方<br/>
 ## 性能
 
 * 移动数
-![](assets/move_30.png)
-![](assets/move_100.png)
+![](./assets/move_30.png)
+![](./assets/move_100.png)
 ![](assets/move_900.png)
 
 * 时间
-![](assets/time_30.png)
-![](assets/time_100.png)
-![](assets/time_900.png)
+![](./assets/time_30.png)
+![](./assets/time_100.png)
+![](./assets/time_900.png)
 
 * 具体数据
 
